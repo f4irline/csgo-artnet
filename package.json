@@ -1,0 +1,27 @@
+{
+  "name": "csgo-artnet",
+  "version": "1.0.0",
+  "description": "A small NodeJS application to transfer data from Counter-Strike: Global Offensive and translate it for a lighting console using the ArtNet protocol.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/f4irline/csgo-artnet.git"
+  },
+  "keywords": [
+    "csgo",
+    "artnet"
+  ],
+  "author": "Tommi Lepola",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/f4irline/csgo-artnet/issues"
+  },
+  "homepage": "https://github.com/f4irline/csgo-artnet#readme",
+  "dependencies": {
+    "artnet": "^1.4.0",
+    "eslint": "^5.9.0"
+  }
+}
