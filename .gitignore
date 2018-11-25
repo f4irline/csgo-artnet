@@ -5,6 +5,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Payload log file
+out.txt
+
 # Runtime data
 pids
 *.pid

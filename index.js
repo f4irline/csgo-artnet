@@ -1,8 +1,35 @@
 const http = require('http');
 const fs = require('fs');
 
-const port = 3000;
-const host = '192.168.10.52';
+const PORT = 3000;
+const HOST = '192.168.10.52';
+
+/**
+ * Universe where the ArtNet signal is sent. Make sure to change this to match the universe you're using
+ * for the signals.
+ */
+const UNIVERSE = 5;
+
+/**
+ * Host IP-address for the ArtNet signal.
+ */
+const options = {
+    host: '192.168.10.52'
+}
+
+let roundOver = false;
+
+/**
+ * To be implemented:
+ * [X] Send artnet signal when bomb is planted
+ * [X] Send artnet signal when bomb is defused
+ * [X] Send artnet signal when bomb has exploded
+ * [ ] Send artnet signal when CTs win
+ * [ ] Send artnet signal when Ts win
+ * [ ] Send artnet signal when a player scores an ace
+ * [ ] Send 10 different artnet signals when players die
+ * [ ] Send 10 different artnet signals when players spawn
+ * /
 
 /*
  * Auth token. Make sure that this authToken is the same which is defined
@@ -17,7 +44,7 @@ const server = http.createServer((req, res) => {
     let eventInfo = '';
 
     req.on('data', (data) => {
-        eventInfo += processPayload(JSON.parse(data.toString()));
+        eventInfo += processGameEvents(JSON.parse(data.toString()));
     });
 
     req.on('end', () => {
@@ -35,7 +62,7 @@ const server = http.createServer((req, res) => {
  * @param {object} data - Payload as JSON object
  * @return {string}
  */
-function processPayload(data) {
+function processGameEvents(data) {
     // Ignore unauthenticated payloads
     if (!isAuthentic(data)) {
         return '';
@@ -44,21 +71,26 @@ function processPayload(data) {
     const date = new Date(data.provider.timestamp * 1000);
     let output = '';
 
-    detectBombPlant(data);
+    if (!roundOver) {
+        output += detectGameEvent(data);
+    } else {
+        output += detectGoingLive(data);
+    }
 
     if (output.length > 0) {
         output = `[${date.getFullYear()}-` +
             `${(date.getMonth() + 1)}-` +
             `${date.getDate()} ` +
             `${date.getHours()}:` +
-            `${('00' + date.getMinutes()).substr(-2)}] `;
+            `${('00' + date.getMinutes()).substr(-2)}] ` +
+            output;
     }
 
     return output;
 }
 
 /**
- * Checks that the auth token from the correct CS:GO server matches the one defined in this software.
+ * Checks that the auth token from the CS:GO server matches the one defined in this software.
  *
  * @param {object} data - The payload from CS:GO observer as a JSON object
  * @return {boolean}
@@ -67,31 +99,85 @@ function isAuthentic(data) {
     return readProperty(data, 'auth.token') === authToken;
 }
 
-/**
- * Checks if the data indicates that the bomb was planted and sends an ArtNet signal and full (255) value
- * to universe 1 channel 1 in the lighting console's address.
- * 
- * @param {object} data - The payload from CS:GO observer as a JSON object
- */
+function detectGoingLive(data) {
+    let output ='';
 
-function detectBombPlant(data) {
-    let output = '';
-
-    if (readProperty(data, 'added.round.bomb')) {
-
-        var options = {
-            host: '192.168.10.52'
-        }
-         
-        var artnet = require('artnet')(options);
-         
-        artnet.set(1, 255, function (err, res) {
-            artnet.close();
-        });        
-        console.log("Bomb planted");
+    if (readProperty(data, 'round.phase') === "live") {
+        roundOver = false;
+        output = "Going live!";
     }
 
     return output;
+}
+
+/**
+ * Checks if any of the events we're interested about happened.
+ * 
+ * @param {object} data - The payload from CS:GO observer as a JSON object
+ */
+function detectGameEvent(data) {
+    let output = '';
+
+    if (readProperty(data, 'added.round.bomb')) {
+        output += bombPlanted();
+    }
+
+    if (readProperty(data, 'round.bomb') === "defused") {
+        output += bombDefused();
+        roundOver = true;
+    } else if (readProperty(data, 'round.bomb') === "exploded") {
+        output += bombExploded();
+        roundOver = true;
+    }
+
+    return output;
+}
+
+/**
+ * Sends an artnet signal to channel one of the defined universe when bomb was planted.
+ * 
+ * @return indication to console that bomb plant was detected.
+ */
+function bombPlanted() {    
+     
+    var artnet = require('artnet')(options);
+     
+    artnet.set(UNIVERSE, 1, 255, function (err, res) {
+        artnet.close();
+    });        
+    return "Bomb planted";
+}
+
+/**
+ * Sends an artnet signal to channel two of the defined universe when bomb was defused.
+ * 
+ * @return indication to console that bomb defusal was detected.
+ */
+function bombDefused() {
+
+    var artnet = require('artnet')(options);
+
+    artnet.set(UNIVERSE, 2, 255, function (err, res) {
+        artnet.close();
+    });
+    
+    return "Bomb defused";
+}
+
+/**
+ * Sends an artnet signal to channel three of the defined universe when bomb was defused.
+ * 
+ * @return indication to console that bomb explosion was detected.
+ */
+function bombExploded() {
+
+    var artnet = require('artnet')(options);
+
+    artnet.set(UNIVERSE, 3, 255, function (err, res) {
+        artnet.close();
+    });
+    
+    return "Bomb exploded";
 }
 
 /**
@@ -119,6 +205,6 @@ function readProperty(container, propertyPath) {
     return value;
 }
 
-server.listen(port, host);
+server.listen(PORT, HOST);
 
 console.log('Monitoring CS:GO rounds');
