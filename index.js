@@ -139,12 +139,12 @@ function detectGameEvent(data) {
  * @return indication to console that bomb plant was detected.
  */
 function bombPlanted() {    
-     
-    var artnet = require('artnet')(options);
-     
+    let artnet = require('artnet')(options);
+
     artnet.set(UNIVERSE, 1, 255, function (err, res) {
         artnet.close();
     });        
+
     return "Bomb planted";
 }
 
@@ -154,8 +154,7 @@ function bombPlanted() {
  * @return indication to console that bomb defusal was detected.
  */
 function bombDefused() {
-
-    var artnet = require('artnet')(options);
+    let artnet = require('artnet')(options);
 
     artnet.set(UNIVERSE, 2, 255, function (err, res) {
         artnet.close();
@@ -170,8 +169,7 @@ function bombDefused() {
  * @return indication to console that bomb explosion was detected.
  */
 function bombExploded() {
-
-    var artnet = require('artnet')(options);
+    let artnet = require('artnet')(options);
 
     artnet.set(UNIVERSE, 3, 255, function (err, res) {
         artnet.close();
