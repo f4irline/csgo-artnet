@@ -11,7 +11,8 @@ const HOST = '192.168.10.52';
 const UNIVERSE = 5;
 
 /**
- * Host IP-address for the ArtNet signal.
+ * Host IP-address for the ArtNet signal. Make sure to change this to match the host IP-address where
+ * the CS:GO Api is sending data.
  */
 const options = {
     host: '192.168.10.52'
