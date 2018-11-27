@@ -4,20 +4,27 @@ fs = require('fs');
 port = 3000;
 host = '192.168.10.52';
 
-server = http.createServer(function(req, res) {
-    console.log('Handling POST request...');
+server = http.createServer( function(req, res) {
 
-    var body = '';
+    if (req.method == 'POST') {
+        console.log("Handling POST request...");
+        res.writeHead(200, {'Content-Type': 'text/html'});
 
-    req.on('data', function (data) {
-        body += data;
-    });
+        var body = '';
+        req.on('data', function (data) {
+            body += data;
+        });
+        req.on('end', function () {
+            console.log("POST payload: " + body);
+        	res.end( '' );
+        });
+    } else {
+        console.log("Not expecting other request types...");
+        res.writeHead(200, {'Content-Type': 'text/html'});
+		var html = '<html><body>HTTP Server at http://' + host + ':' + port + '</body></html>';
+        res.end(html);
+    }
 
-    req.on('end', function () {
-        console.log('POST payload: ' + body);
-
-        res.end('');
-    });
 });
 
 server.listen(port, host);
