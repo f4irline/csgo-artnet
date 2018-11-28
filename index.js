@@ -1,21 +1,25 @@
 const http = require('http');
 const fs = require('fs');
 
-const PORT = 3000;
-const HOST = '192.168.10.52';
+var config = require('./config.js');
 
 /**
- * Universe where the ArtNet signal is sent. Make sure to change this to match the universe you're using
- * for the signals.
+ * Make sure to configure your config.js file to match your desired settings!
  */
-const UNIVERSE = 5;
+
+const HOST = config.HOST;
+const PORT = config.PORT;
 
 /**
- * Host IP-address for the ArtNet signal. Make sure to change this to match the host IP-address where
- * the CS:GO Api is sending data.
+ * Universe where the ArtNet signal is sent.
+ */
+const UNIVERSE = config.UNIVERSE;
+
+/**
+ * Host IP-address for the ArtNet signal.
  */
 const options = {
-    host: '192.168.10.52'
+    host: config.HOST
 }
 
 /**
@@ -45,8 +49,8 @@ let aceCalled = false;
  * in the CS:GO .cfg file (either gamestate_integration_observerspectator.cfg
  * or gamestate_integration_consolesample.cfg)
  */
-const authTokenPlayer = 'CCWJu64ZV3JHDT8hZc';
-const authTokenObserver = 'Q79v5tcxVQ8u';
+const authTokenPlayer = config.AUTHPLAYER;
+const authTokenObserver = config.AUTHOBSERVER;
 
 const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html' });
