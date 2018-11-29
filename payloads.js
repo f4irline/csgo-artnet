@@ -1,8 +1,10 @@
 http = require('http');
 fs = require('fs');
 
-port = 3000;
-host = '192.168.10.52';
+var config = require('./config.js');
+
+const HOST = config.HOST;
+const PORT = config.PORT;
 
 server = http.createServer( function(req, res) {
 
@@ -21,11 +23,11 @@ server = http.createServer( function(req, res) {
     } else {
         console.log("Not expecting other request types...");
         res.writeHead(200, {'Content-Type': 'text/html'});
-		var html = '<html><body>HTTP Server at http://' + host + ':' + port + '</body></html>';
+		var html = '<html><body>HTTP Server at http://' + HOST + ':' + PORT + '</body></html>';
         res.end(html);
     }
 
 });
 
-server.listen(port, host);
-console.log('Listening at http://' + host + ':' + port);
+server.listen(PORT, HOST);
+console.log('Listening at http://' + HOST + ':' + PORT);
