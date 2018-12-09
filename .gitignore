@@ -8,9 +8,6 @@ yarn-error.log*
 # Payload log file
 out.txt
 
-# config.js which should only hold placeholders in the git repo
-config.js
-
 # Runtime data
 pids
 *.pid
