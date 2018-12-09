@@ -1,6 +1,25 @@
-const http = require('http');
-const fs = require('fs');
+/**
+ * Basic express configuration
+ */
+var express = require('express');
+var app = express();
+var router = express.Router();
 
+/**
+ * Extracts the entire body portion of an incoming request and
+ * exposes it on req.body
+ */
+var bodyParser = require('body-parser')
+
+/**
+ * Used to serve the index.html file from the "public" directory"
+ */
+router.use(express.static('public'));
+
+/**
+ * Holds configurations for the app, such as auth keys,
+ * IP-address, port etc.
+ */
 var config = require('./config.js');
 
 /**
@@ -51,8 +70,53 @@ let aceCalled = false;
  */
 const authTokenPlayer = config.AUTHPLAYER;
 const authTokenObserver = config.AUTHOBSERVER;
+const authTokenArtnet = config.ARTNETAUTH;
 
-const server = http.createServer((req, res) => {
+/**
+ * Configure the router handler to use bodyParser to parse the req.body
+ */
+router.use(bodyParser.urlencoded({ extended: true}));
+router.use(bodyParser.json());
+
+/**
+ * Send the index.html from the public folder to the browser when requested
+ */
+router.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+
+    req.on('data', (data) => {
+        console.log(data);
+    })
+});
+
+/**
+ * Handles the POST requests from the button clicks. When a button click
+ * and the request has been received, it first validates the request 
+ * (with an auth key), and then sends an artnet signal to the channel that 
+ * was given in the request body.
+ */
+router.post('/clicked', (req, res) => {
+    const AUTH = req.body.auth;
+    const CHANNEL = req.body.channel;
+
+    if (AUTH === authTokenArtnet) { 
+        res.writeHead(200, { "Content-Type": "text/html" });
+
+        let artnet = require('artnet')(options);
+
+        artnet.set(UNIVERSE, CHANNEL, 255, function (err, res) {
+            artnet.close();
+        });       
+
+        res.end('ok');
+    } else {
+        res.writeHead(401, { "Content-Type": "text/html" });
+        res.end('authfail');
+    }
+});
+
+router.post('/', function(req, res, next) {
+
     res.writeHead(200, { 'Content-Type': 'text/html' });
 
     let body = '';
@@ -63,12 +127,15 @@ const server = http.createServer((req, res) => {
 
     req.on('end', () => {
         let eventInfo = processGameEvents(JSON.parse(body));
+        console.log(body);
         if (eventInfo !== '') {
             console.log(eventInfo);
         }
 
         res.end('');
     });
+
+    next();
 });
 
 /**
@@ -358,6 +425,8 @@ function readProperty(container, propertyPath) {
     return value;
 }
 
-server.listen(PORT, HOST);
+app.use('/', router);
+
+app.listen(PORT, HOST);
 
 console.log('Monitoring CS:GO rounds');
