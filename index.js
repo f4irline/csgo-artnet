@@ -59,8 +59,8 @@ let aceCalled = false;
  * [X] Send artnet signal when CTs win - Channel 4
  * [X] Send artnet signal when Ts win - Channel 5
  * [X] Send artnet signal when a player scores an ace - Channel 6
+ * [X] Simple HTML controls to test that Artnet works properly.
  * [/] Send 10 different artnet signals when players die
- * [ ] Simple HTML controls to test that Artnet works properly.
  * /
 
 /*
