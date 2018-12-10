@@ -3,8 +3,41 @@
   <head>
     <meta charset="utf-8">
     <title>Artnet Tester</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
+    <form>
+      <div class="wrapper">
+        <div class="input">
+          IP-Address:<br>
+          <input type="text" name="ipaddress"><br>
+        </div>
+        <div class="input">
+          Port:<br>
+          <input type="text" name="port"><br>
+        </div>
+        <div class="input">
+          Universe:<br>
+          <input type="number" min="1" max="256" value="1">
+        </div>
+      </div>
+      <br>
+      <div class="wrapper">
+        <div class="input">
+          Player Token:<br>
+          <input type="text" name="playerauth"><br>
+        </div>
+        <div class="input">
+          Observer Token:<br>
+            <input type="text" name="observerauth"><br>
+          </div>
+        <div class="input">
+          Tester Token:<br>
+            <input type="text" name="testertoken"><br>
+        </div>
+      </div>
+    </form>
+    <br>
     <button id="channelOne">Channel One</button>
     <button id="channelTwo">Channel Two</button>
     <button id="channelThree">Channel Three</button>
