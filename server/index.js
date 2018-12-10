@@ -6,71 +6,45 @@ var app = express();
 var router = express.Router();
 
 /**
+ * Filesystem module for reading and writing to .json file
+ */
+const fs = require('fs');
+
+/**
+ * Config file path
+ */
+const path = './config.json';
+
+/**
  * Extracts the entire body portion of an incoming request and
  * exposes it on req.body
  */
 var bodyParser = require('body-parser')
 
 /**
- * Used to serve the index.html file from the "public" directory"
+ * IP-address and port where the ArtNet signals are sent.
  */
-router.use(express.static('public'));
-
-/**
- * Holds configurations for the app, such as auth keys,
- * IP-address, port etc.
- */
-var config = require('../config.js');
-
-/**
- * Make sure to configure your config.js file to match your desired settings!
- */
-
-const HOST = config.HOST;
-const PORT = config.PORT;
+let options = {
+    host: "",
+    port: ""
+}
 
 /**
  * Universe where the ArtNet signal is sent.
  */
-const UNIVERSE = config.UNIVERSE;
+let UNIVERSE = "";
 
 /**
- * Host IP-address for the ArtNet signal.
+ * Auth tokens for player, observer and artnet tester.
  */
-const options = {
-    host: config.HOST
-}
+let authTokenPlayer = "";
+let authTokenObserver = "";
+let authTokenArtnet = "";
 
 /**
- * Is the round over or not? Used to avoid duplicate method calls.
+ * Used to serve the index.html file from the "public" directory"
  */
-let roundOver = true;
-
-/**
- * Has the ace been already called or not? Used to avoid duplicate method calls.
- */
-let aceCalled = false;
-
-/**
- * To be implemented:
- * [X] Send artnet signal when bomb is planted - Channel 1
- * [X] Send artnet signal when bomb is defused - Channel 2
- * [X] Send artnet signal when bomb has exploded - Channel 3
- * [X] Send artnet signal when CTs win - Channel 4
- * [X] Send artnet signal when Ts win - Channel 5
- * [X] Send artnet signal when a player scores an ace - Channel 6
- * [X] Simple HTML controls to test that Artnet works properly.
- * [/] Send 10 different artnet signals when players die
- * /
-
-/*
- * Auth token. Make sure that this authToken is the same which is defined
- * in the CS:GO .cfg file (either gamestate_integration_observerspectator.cfg
- * or gamestate_integration_consolesample.cfg)
- */
-const authTokenPlayer = config.AUTHPLAYER;
-const authTokenObserver = config.AUTHOBSERVER;
-const authTokenArtnet = config.ARTNETAUTH;
+router.use(express.static('public'));
 
 /**
  * Configure the router handler to use bodyParser to parse the req.body
@@ -83,17 +57,40 @@ router.use(bodyParser.json());
  */
 router.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
-
-    req.on('data', (data) => {
-        console.log(data);
-    })
 });
+
+/**
+ * JSON Object (which will be parsed from the config.json file)
+ */
+let obj = {};
+
+router.get('/settings', (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+
+    try {
+        if (fs.existsSync(path)) {
+            obj = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+            UNIVERSE = obj.universe;
+            options = {
+                host: obj.ip,
+                port: obj.port
+            }
+            authTokenPlayer = obj.playertoken;
+            authTokenObserver = obj.observertoken;
+            authTokenArtnet = obj.testertoken;
+        }
+      } catch(err) {
+        console.error(err)
+    }
+
+    res.json(obj);
+})
 
 /**
  * Handles the POST requests from the button clicks. When a button click
  * and the request has been received, it first validates the request 
  * (with an auth key), and then sends an artnet signal to the channel that 
- * was given in the request body.
+ * was given in the request body (depending on the button).
  */
 router.post('/clicked', (req, res) => {
     const AUTH = req.body.auth;
@@ -115,18 +112,42 @@ router.post('/clicked', (req, res) => {
     }
 });
 
+/**
+ * Handles the POST request from the form submit. Pushes everything
+ * in the request to an object and writes the object to a .json file.
+ */
 router.post('/config', (req, res) => {
     res.writeHead(200, { "Content-Type": "text/html"});
 
-    console.log(req.body.ipaddress);
-    console.log(req.body.port);
-    console.log(req.body.universe);
-    console.log(req.body.playertoken);
-    console.log(req.body.observertoken);
-    console.log(req.body.testertoken);
+    let obj = {
+        ip: req.body.ipaddress,
+        port: req.body.port,
+        universe: req.body.universe,
+        playertoken: req.body.playertoken,
+        observertoken: req.body.observertoken,
+        testertoken: req.body.testertoken
+    }
+
+    fs.writeFile("./config.json", JSON.stringify(obj, null, 2), (err) => {
+        if (err) {
+            console.error(err);
+            return;
+        };
+        console.log("File has been created");
+    });
 
     res.end('ok');
 })
+
+/**
+ * Is the round over or not? Used to avoid duplicate method calls.
+ */
+let roundOver = true;
+
+/**
+ * Has the ace been already called or not? Used to avoid duplicate method calls.
+ */
+let aceCalled = false;
 
 router.post('/', function(req, res, next) {
 
@@ -440,6 +461,6 @@ function readProperty(container, propertyPath) {
 
 app.use('/', router);
 
-app.listen(PORT, "localhost");
+app.listen("3000", "localhost");
 
 console.log('Monitoring CS:GO rounds');
