@@ -1,14 +1,14 @@
 /**
  * Which IP-address and port the app listens from?
  */
-exports.HOST = 'IP ADDRESS TO LISTEN FROM HERE';
-exports.PORT = 'PORT TO LISTEN TO HERE';
+exports.HOST = "192.168.10.52";
+exports.PORT = 3000;
 
 /**
  * Universe where the ArtNet signal is sent. Make sure to set this to be the
  * desired universe where the ArtNet signal is hoped to be sent.
  */
-exports.UNIVERSE = 'UNIVERSE TO SEND THE ARTNET SIGNALS TO HERE';
+exports.UNIVERSE = 5;
 
 /*
  * Auth token. Make sure that these are the same which are defined in the
@@ -19,4 +19,4 @@ exports.UNIVERSE = 'UNIVERSE TO SEND THE ARTNET SIGNALS TO HERE';
  */
 exports.AUTHPLAYER = 'PLAYER AUTH KEY HERE';
 exports.AUTHOBSERVER = 'OBSERVER AUTH KEY HERE';
-exports.ARTNETAUTH = 'ARTNET TESTER AUTH KEY HERE';
+exports.ARTNETAUTH = "UQnXUDLjpmBCzaOXUb";

@@ -1,7 +1,7 @@
 /**
  * For authentication purposes in the server side
  */
-var authTokenArtnet = 'ARTNET TESTER AUTH KEY HERE';
+var authTokenArtnet = 'UQnXUDLjpmBCzaOXUb';
 
 /**
  * For creating event listeners

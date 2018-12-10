@@ -1,7 +1,7 @@
 http = require('http');
 fs = require('fs');
 
-var config = require('./config.js');
+var config = require('../config.js');
 
 const HOST = config.HOST;
 const PORT = config.PORT;

@@ -20,7 +20,7 @@ router.use(express.static('public'));
  * Holds configurations for the app, such as auth keys,
  * IP-address, port etc.
  */
-var config = require('./config.js');
+var config = require('../config.js');
 
 /**
  * Make sure to configure your config.js file to match your desired settings!
