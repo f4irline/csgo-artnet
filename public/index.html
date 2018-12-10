@@ -3,10 +3,11 @@
   <head>
     <meta charset="utf-8">
     <title>Artnet Tester</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
-    <form>
+    <form id="config" onsubmit={validate()}>
       <div class="wrapper">
         <div class="input">
           IP-Address:<br>
@@ -18,7 +19,7 @@
         </div>
         <div class="input">
           Universe:<br>
-          <input type="number" min="1" max="256" value="1">
+          <input type="number" name="universe" min="1" max="256" value="1">
         </div>
       </div>
       <br>
@@ -34,6 +35,12 @@
         <div class="input">
           Tester Token:<br>
             <input type="text" name="testertoken"><br>
+        </div>
+      </div>
+      <br>
+      <div class="wrapper">
+        <div class="input">
+          <input type="submit">
         </div>
       </div>
     </form>
