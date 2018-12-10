@@ -7,34 +7,34 @@
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
-    <form id="config" onsubmit={validate()}>
+    <form id="config" onsubmit="return validate()">
       <div class="wrapper">
         <div class="input">
           IP-Address:<br>
-          <input type="text" name="ipaddress"><br>
+          <input type="text" name="ipaddress" id="ip"><br>
         </div>
         <div class="input">
           Port:<br>
-          <input type="text" name="port"><br>
+          <input type="text" name="portnumber" id="port"><br>
         </div>
         <div class="input">
           Universe:<br>
-          <input type="number" name="universe" min="1" max="256" value="1">
+          <input type="number" name="universe" id="uni" min="1" max="256">
         </div>
       </div>
       <br>
       <div class="wrapper">
         <div class="input">
           Player Token:<br>
-          <input type="text" name="playerauth"><br>
+          <input type="text" name="playerauth" id="playertoken"><br>
         </div>
         <div class="input">
           Observer Token:<br>
-            <input type="text" name="observerauth"><br>
+            <input type="text" name="observerauth" id="observertoken"><br>
           </div>
         <div class="input">
           Tester Token:<br>
-            <input type="text" name="testertoken"><br>
+            <input type="text" name="testerauth" id ="testertoken"><br>
         </div>
       </div>
       <br>
@@ -45,11 +45,14 @@
       </div>
     </form>
     <br>
-    <button id="channelOne">Channel One</button>
-    <button id="channelTwo">Channel Two</button>
-    <button id="channelThree">Channel Three</button>
-    <button id="channelFour">Channel Four</button>
-    <button id="channelFive">Channel Five</button>
+    <button id="tokenGenerator">Generate Tokens</button>
+    <br>
+    <br>
+    <button id="1" class="button">Channel One</button>
+    <button id="2" class="button">Channel Two</button>
+    <button id="3" class="button">Channel Three</button>
+    <button id="4" class="button">Channel Four</button>
+    <button id="5" class="button">Channel Five</button>
 </body>
 <script src="client.js"></script>
 </html>
