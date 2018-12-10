@@ -115,6 +115,19 @@ router.post('/clicked', (req, res) => {
     }
 });
 
+router.post('/config', (req, res) => {
+    res.writeHead(200, { "Content-Type": "text/html"});
+
+    console.log(req.body.ipaddress);
+    console.log(req.body.port);
+    console.log(req.body.universe);
+    console.log(req.body.playertoken);
+    console.log(req.body.observertoken);
+    console.log(req.body.testertoken);
+
+    res.end('ok');
+})
+
 router.post('/', function(req, res, next) {
 
     res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -427,6 +440,6 @@ function readProperty(container, propertyPath) {
 
 app.use('/', router);
 
-app.listen(PORT, HOST);
+app.listen(PORT, "localhost");
 
 console.log('Monitoring CS:GO rounds');
