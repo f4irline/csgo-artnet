@@ -1,6 +1,6 @@
 # CS:GO GSI - ArtNet Application
 
-## An application to fetch data from CS:GO Game State Integration API and turn it to ArtNet signal
+## An application to fetch data from CS:GO Game State Integration API and send ArtNet signals depending on the game events
 
 ### INTRODUCTION
 
