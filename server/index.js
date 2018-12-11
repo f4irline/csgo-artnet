@@ -1,9 +1,12 @@
 /**
  * Basic express configuration
  */
-var express = require('express');
-var app = express();
-var router = express.Router();
+const express = require('express');
+const app = express();
+const router = express.Router();
+
+let HOST = "";
+let PORT = "";
 
 /**
  * Filesystem module for reading and writing to .json file
@@ -13,18 +16,25 @@ const fs = require('fs');
 /**
  * Config file path
  */
-const path = './config.json';
+const configPath = './config.json';
+
+/**
+ * Host configuration file path
+ */
+const hostPath = './host.json';
 
 /**
  * Extracts the entire body portion of an incoming request and
  * exposes it on req.body
  */
-var bodyParser = require('body-parser')
+const bodyParser = require('body-parser')
 
 /**
  * JSON Object (which will be parsed from the config.json file)
  */
-let obj = {};
+let config = {};
+
+let hostSettings = {};
 
 /**
  * IP-address and port where the ArtNet signals are sent.
@@ -46,20 +56,51 @@ let authTokenPlayer = "";
 let authTokenObserver = "";
 let authTokenArtnet = "";
 
-try {
-    if (fs.existsSync(path)) {
-        obj = JSON.parse(fs.readFileSync('config.json', 'utf8'));
-        UNIVERSE = obj.universe;
-        options = {
-            host: obj.ip,
-            port: obj.port
+/**
+ * Checks if host.json and config.json files exist.
+ * 
+ * host.json file has configuration for the server itself. It holds 
+ * IP address and port where to start listening requests from.
+ * 
+ * config.json file has configuration for ArtNet signal and auth tokens.
+ * 
+ * If host.json file does not exist, the App tells the user to run 
+ * "npm run init" first, where the host.json file will be made, and the
+ * server won't launch.
+ */
+function checkExistingFiles() {
+    var hostFound = false;
+
+    try {
+        if (fs.existsSync(hostPath)) {
+            hostSettings = JSON.parse(fs.readFileSync('host.json', 'utf8'));
+            HOST = hostSettings.ip;
+            PORT = hostSettings.port;
+            hostFound = true;
+        } else {
+            console.error("Please run \"npm run setup\"");
         }
-        authTokenPlayer = obj.playertoken;
-        authTokenObserver = obj.observertoken;
-        authTokenArtnet = obj.testertoken;
+    } catch (err) {
+        console.error(err);
     }
-  } catch(err) {
-    console.error(err)
+    
+    try {
+        if (fs.existsSync(configPath)) {
+            config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+            UNIVERSE = config.universe;
+            options = {
+                host: config.ip,
+                port: config.port
+            }
+            authTokenPlayer = config.playertoken;
+            authTokenObserver = config.observertoken;
+            authTokenArtnet = config.testertoken;
+        }
+      } catch(err) {
+        console.error(err)
+    }
+
+    return hostFound;
 }
 
 /**
@@ -84,22 +125,22 @@ router.get('/settings', (req, res) => {
     res.setHeader("Content-Type", "application/json");
 
     try {
-        if (fs.existsSync(path)) {
-            obj = JSON.parse(fs.readFileSync('config.json', 'utf8'));
-            UNIVERSE = obj.universe;
+        if (fs.existsSync(configPath)) {
+            config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+            UNIVERSE = config.universe;
             options = {
-                host: obj.ip,
-                port: obj.port
+                host: config.ip,
+                port: config.port
             }
-            authTokenPlayer = obj.playertoken;
-            authTokenObserver = obj.observertoken;
-            authTokenArtnet = obj.testertoken;
+            authTokenPlayer = config.playertoken;
+            authTokenObserver = config.observertoken;
+            authTokenArtnet = config.testertoken;
         }
       } catch(err) {
         console.error(err)
     }
 
-    res.json(obj);
+    res.json(config);
 })
 
 /**
@@ -135,7 +176,7 @@ router.post('/clicked', (req, res) => {
 router.post('/config', (req, res) => {
     res.writeHead(200, { "Content-Type": "text/html"});
 
-    let obj = {
+    let config = {
         ip: req.body.ipaddress,
         port: req.body.port,
         universe: req.body.universe,
@@ -144,7 +185,7 @@ router.post('/config', (req, res) => {
         testertoken: req.body.testertoken
     }
 
-    fs.writeFile("./config.json", JSON.stringify(obj, null, 2), (err) => {
+    fs.writeFile("./config.json", JSON.stringify(config, null, 2), (err) => {
         if (err) {
             console.error(err);
             return;
@@ -481,6 +522,8 @@ function readProperty(container, propertyPath) {
 
 app.use('/', router);
 
-app.listen(3000, "127.0.0.1");
+if (checkExistingFiles()) {
+    app.listen(PORT, HOST);
 
-console.log('Monitoring CS:GO rounds');
+    console.log('Monitoring CS:GO rounds at '+HOST+":"+PORT);
+}
