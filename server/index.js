@@ -1,76 +1,110 @@
 /**
  * Basic express configuration
  */
-var express = require('express');
-var app = express();
-var router = express.Router();
+const express = require('express');
+const app = express();
+const router = express.Router();
+
+let HOST = "";
+let PORT = "";
+
+/**
+ * Filesystem module for reading and writing to .json file
+ */
+const fs = require('fs');
+
+/**
+ * Config file path
+ */
+const configPath = './config.json';
+
+/**
+ * Host configuration file path
+ */
+const hostPath = './host.json';
 
 /**
  * Extracts the entire body portion of an incoming request and
  * exposes it on req.body
  */
-var bodyParser = require('body-parser')
+const bodyParser = require('body-parser')
+
+/**
+ * JSON Object (which will be parsed from the config.json file)
+ */
+let config = {};
+
+let hostSettings = {};
+
+/**
+ * IP-address and port where the ArtNet signals are sent.
+ */
+let options = {
+    host: "",
+    port: ""
+}
+
+/**
+ * Universe where the ArtNet signal is sent.
+ */
+let UNIVERSE = "";
+
+/**
+ * Auth tokens for player, observer and artnet tester.
+ */
+let authTokenPlayer = "";
+let authTokenObserver = "";
+let authTokenArtnet = "";
+
+/**
+ * Checks if host.json and config.json files exist.
+ * 
+ * host.json file has configuration for the server itself. It holds 
+ * IP address and port where to start listening requests from.
+ * 
+ * config.json file has configuration for ArtNet signal and auth tokens.
+ * 
+ * If host.json file does not exist, the App tells the user to run 
+ * "npm run init" first, where the host.json file will be made, and the
+ * server won't launch.
+ */
+function checkExistingFiles() {
+    var hostFound = false;
+
+    try {
+        if (fs.existsSync(hostPath)) {
+            hostSettings = JSON.parse(fs.readFileSync('host.json', 'utf8'));
+            HOST = hostSettings.ip;
+            PORT = hostSettings.port;
+            hostFound = true;
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    
+    try {
+        if (fs.existsSync(configPath)) {
+            config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+            UNIVERSE = config.universe;
+            options = {
+                host: config.ip,
+                port: config.port
+            }
+            authTokenPlayer = config.playertoken;
+            authTokenObserver = config.observertoken;
+            authTokenArtnet = config.testertoken;
+        }
+      } catch(err) {
+        console.error(err)
+    }
+
+    return hostFound;
+}
 
 /**
  * Used to serve the index.html file from the "public" directory"
  */
 router.use(express.static('public'));
-
-/**
- * Holds configurations for the app, such as auth keys,
- * IP-address, port etc.
- */
-var config = require('./config.js');
-
-/**
- * Make sure to configure your config.js file to match your desired settings!
- */
-
-const HOST = config.HOST;
-const PORT = config.PORT;
-
-/**
- * Universe where the ArtNet signal is sent.
- */
-const UNIVERSE = config.UNIVERSE;
-
-/**
- * Host IP-address for the ArtNet signal.
- */
-const options = {
-    host: config.HOST
-}
-
-/**
- * Is the round over or not? Used to avoid duplicate method calls.
- */
-let roundOver = true;
-
-/**
- * Has the ace been already called or not? Used to avoid duplicate method calls.
- */
-let aceCalled = false;
-
-/**
- * To be implemented:
- * [X] Send artnet signal when bomb is planted - Channel 1
- * [X] Send artnet signal when bomb is defused - Channel 2
- * [X] Send artnet signal when bomb has exploded - Channel 3
- * [X] Send artnet signal when CTs win - Channel 4
- * [X] Send artnet signal when Ts win - Channel 5
- * [X] Send artnet signal when a player scores an ace - Channel 6
- * [X] Simple HTML controls to test that Artnet works properly.
- * [/] Send 10 different artnet signals when players die
- * /
-
-/*
- * Auth token. Make sure that this authToken is the same which is defined
- * in the CS:GO .cfg file (either gamestate_integration_observerspectator.cfg
- * or gamestate_integration_consolesample.cfg)
- */
-const authTokenPlayer = config.AUTHPLAYER;
-const authTokenObserver = config.AUTHOBSERVER;
-const authTokenArtnet = config.ARTNETAUTH;
 
 /**
  * Configure the router handler to use bodyParser to parse the req.body
@@ -83,17 +117,35 @@ router.use(bodyParser.json());
  */
 router.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
-
-    req.on('data', (data) => {
-        console.log(data);
-    })
 });
+
+router.get('/settings', (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+
+    try {
+        if (fs.existsSync(configPath)) {
+            config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+            UNIVERSE = config.universe;
+            options = {
+                host: config.ip,
+                port: config.port
+            }
+            authTokenPlayer = config.playertoken;
+            authTokenObserver = config.observertoken;
+            authTokenArtnet = config.testertoken;
+        }
+      } catch(err) {
+        console.error(err)
+    }
+
+    res.json(config);
+})
 
 /**
  * Handles the POST requests from the button clicks. When a button click
  * and the request has been received, it first validates the request 
  * (with an auth key), and then sends an artnet signal to the channel that 
- * was given in the request body.
+ * was given in the request body (depending on the button).
  */
 router.post('/clicked', (req, res) => {
     const AUTH = req.body.auth;
@@ -115,7 +167,44 @@ router.post('/clicked', (req, res) => {
     }
 });
 
-router.post('/', function(req, res, next) {
+/**
+ * Handles the POST request from the form submit. Pushes everything
+ * in the request to an object and writes the object to a .json file.
+ */
+router.post('/config', (req, res) => {
+    res.writeHead(200, { "Content-Type": "text/html"});
+
+    let config = {
+        ip: req.body.ipaddress,
+        port: req.body.port,
+        universe: req.body.universe,
+        playertoken: req.body.playertoken,
+        observertoken: req.body.observertoken,
+        testertoken: req.body.testertoken
+    }
+
+    fs.writeFile("./config.json", JSON.stringify(config, null, 2), (err) => {
+        if (err) {
+            console.error(err);
+            return;
+        };
+        console.log("File has been created");
+    });
+
+    res.end('ok');
+})
+
+/**
+ * Is the round over or not? Used to avoid duplicate method calls.
+ */
+let roundOver = true;
+
+/**
+ * Has the ace been already called or not? Used to avoid duplicate method calls.
+ */
+let aceCalled = false;
+
+app.post('/csgo', function(req, res, next) {
 
     res.writeHead(200, { 'Content-Type': 'text/html' });
 
@@ -127,7 +216,6 @@ router.post('/', function(req, res, next) {
 
     req.on('end', () => {
         let eventInfo = processGameEvents(JSON.parse(body));
-        console.log(body);
         if (eventInfo !== '') {
             console.log(eventInfo);
         }
@@ -260,12 +348,17 @@ function checkWinningTeam(data) {
 function monitorPlayers(players) {
     let aceFound = false;
 
-    Object.keys(players).forEach(function(key) {
-        const player = players[key];
-        if (checkKillsAndHealth(player)) {
-            aceFound = true;
-        }
-    });
+    try {
+        Object.keys(players).forEach(function(key) {
+            const player = players[key];
+            if (checkKillsAndHealth(player)) {
+                aceFound = true;
+            }
+        });
+    } catch (err) {
+        aceFound = false;
+    }
+
     return aceFound;
 }
 
@@ -427,6 +520,10 @@ function readProperty(container, propertyPath) {
 
 app.use('/', router);
 
-app.listen(PORT, HOST);
+if (checkExistingFiles()) {
+    app.listen(PORT, HOST);
 
-console.log('Monitoring CS:GO rounds');
+    console.log('Listening at '+HOST+":"+PORT);
+} else {
+    console.error("Please run \"npm run setup\"");
+}
