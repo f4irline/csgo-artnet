@@ -8,6 +8,7 @@
   </head>
   <body>
     <form id="config" onsubmit="return validate()">
+      <h2>ArtNet signal preferences</h2>
       <div class="wrapper">
         <div class="input">
           IP-Address:<br>
@@ -22,7 +23,7 @@
           <input type="number" name="universe" id="uni" min="1" max="256">
         </div>
       </div>
-      <br>
+      <h2>Tokens for authentication</h2>
       <div class="wrapper">
         <div class="input">
           Player Token:<br>
@@ -37,17 +38,14 @@
             <input type="text" name="testerauth" id ="testertoken"><br>
         </div>
       </div>
-      <br>
+      <button type="button" id="tokenGenerator" class="button">Generate Tokens</button>
       <div class="wrapper">
         <div class="input">
-          <input type="submit">
+          <button type="submit" class="button">Submit</button>
         </div>
       </div>
     </form>
-    <br>
-    <button id="tokenGenerator">Generate Tokens</button>
-    <br>
-    <br>
+    <h2>ArtNet tester buttons</h2>
     <button id="1" class="button">Channel One</button>
     <button id="2" class="button">Channel Two</button>
     <button id="3" class="button">Channel Three</button>
