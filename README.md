@@ -33,9 +33,11 @@ Basically the application listens to requests from the CS:GO Game State Integrat
    - "Player Token" is used for fetching data from player side of the CS:GO GSI
    - "Observer Token" is used for fetching data from observer side of the CS:GO GSI (e.g. LAN tournament setting)
    - "Tester Token" is used for the web browser ArtNet tester buttons.
-7. Make sure that the tokens match the ones in the CS:GO gamestate_integration_x.cfg files (check https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Game_State_Integration)
+7. From the CS:GO gamestate_integration_x.cfg (whichever you're using) file, make sure that:
+   - The tokens match the ones in the CS:GO gamestate_integration_x.cfg files
+   - The "uri" is "127.0.0.1:3000/csgo" 
+   - Check https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Game_State_Integration for more information
 8. Launch game and connect to a game server!
-
 
 ### TO BE IMPLEMENTED
 - Sending ArtNet signal to individual channels when an individual player dies
