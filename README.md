@@ -15,12 +15,12 @@ Basically the application listens to requests from the CS:GO Game State Integrat
   - Generating authentication tokens for the HTTP requests and saving them to server side
   - Testing ArtNet signal via tester buttons
 - CS:GO GSI data processing, sending ArtNet signal on following events:
-    - Bomb was planted
-    - Bomb was defused
-    - Bomb was exploded
-    - CTs win
-    - Ts win
-    - Player scores an ace
+  - Bomb was planted
+  - Bomb was defused
+  - Bomb was exploded
+  - CTs win
+  - Ts win
+  - Player scores an ace
 
 ### HOW TO USE
 
