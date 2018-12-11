@@ -26,18 +26,20 @@ Basically the application listens to requests from the CS:GO Game State Integrat
 
 1. Clone this repository anywhere on your local machine
 2. Run "npm install" via command line / terminal in the new local folder
-3. Run "npm start"
-4. Open your web browser and go to "127.0.0.1:3000"
-5. Set IP-Address, Port and Universe where the ArtNet signal will be sent.
-6. Set tokens
+3. Run "npm run setup". This part will help you initialize the app.
+4. Run "npm start"
+5. Open your web browser and go to the address:port which you defined during the "npm run setup" phase.
+   - The command line will also tell you the correct address, e.g. "Listening at 127.0.0.1:3000"
+6. Set IP-Address, Port and Universe where the ArtNet signal will be sent.
+7. Set tokens
    - "Player Token" is used for fetching data from player side of the CS:GO GSI
    - "Observer Token" is used for fetching data from observer side of the CS:GO GSI (e.g. LAN tournament setting)
    - "Tester Token" is used for the web browser ArtNet tester buttons.
-7. From the CS:GO gamestate_integration_x.cfg (whichever you're using) file, make sure that:
+8. From the CS:GO gamestate_integration_x.cfg (whichever you're using) file, make sure that:
    - The tokens match the ones in the CS:GO gamestate_integration_x.cfg files
    - The "uri" is "127.0.0.1:3000/csgo" 
    - Check https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Game_State_Integration for more information
-8. Launch game and connect to a game server!
+9. Launch game and connect to a game server!
 
 ### TO BE IMPLEMENTED
 - Sending ArtNet signal to individual channels when an individual player dies
