@@ -22,6 +22,11 @@ const path = './config.json';
 var bodyParser = require('body-parser')
 
 /**
+ * JSON Object (which will be parsed from the config.json file)
+ */
+let obj = {};
+
+/**
  * IP-address and port where the ArtNet signals are sent.
  */
 let options = {
@@ -41,6 +46,22 @@ let authTokenPlayer = "";
 let authTokenObserver = "";
 let authTokenArtnet = "";
 
+try {
+    if (fs.existsSync(path)) {
+        obj = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+        UNIVERSE = obj.universe;
+        options = {
+            host: obj.ip,
+            port: obj.port
+        }
+        authTokenPlayer = obj.playertoken;
+        authTokenObserver = obj.observertoken;
+        authTokenArtnet = obj.testertoken;
+    }
+  } catch(err) {
+    console.error(err)
+}
+
 /**
  * Used to serve the index.html file from the "public" directory"
  */
@@ -58,11 +79,6 @@ router.use(bodyParser.json());
 router.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
-
-/**
- * JSON Object (which will be parsed from the config.json file)
- */
-let obj = {};
 
 router.get('/settings', (req, res) => {
     res.setHeader("Content-Type", "application/json");
@@ -149,7 +165,7 @@ let roundOver = true;
  */
 let aceCalled = false;
 
-router.post('/', function(req, res, next) {
+app.post('/csgo', function(req, res, next) {
 
     res.writeHead(200, { 'Content-Type': 'text/html' });
 
@@ -161,7 +177,6 @@ router.post('/', function(req, res, next) {
 
     req.on('end', () => {
         let eventInfo = processGameEvents(JSON.parse(body));
-        console.log(body);
         if (eventInfo !== '') {
             console.log(eventInfo);
         }
@@ -294,12 +309,17 @@ function checkWinningTeam(data) {
 function monitorPlayers(players) {
     let aceFound = false;
 
-    Object.keys(players).forEach(function(key) {
-        const player = players[key];
-        if (checkKillsAndHealth(player)) {
-            aceFound = true;
-        }
-    });
+    try {
+        Object.keys(players).forEach(function(key) {
+            const player = players[key];
+            if (checkKillsAndHealth(player)) {
+                aceFound = true;
+            }
+        });
+    } catch (err) {
+        aceFound = false;
+    }
+
     return aceFound;
 }
 
@@ -461,6 +481,6 @@ function readProperty(container, propertyPath) {
 
 app.use('/', router);
 
-app.listen("3000", "localhost");
+app.listen(3000, "127.0.0.1");
 
 console.log('Monitoring CS:GO rounds');
