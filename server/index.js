@@ -77,8 +77,6 @@ function checkExistingFiles() {
             HOST = hostSettings.ip;
             PORT = hostSettings.port;
             hostFound = true;
-        } else {
-            console.error("Please run \"npm run setup\"");
         }
     } catch (err) {
         console.error(err);
@@ -525,5 +523,7 @@ app.use('/', router);
 if (checkExistingFiles()) {
     app.listen(PORT, HOST);
 
-    console.log('Monitoring CS:GO rounds at '+HOST+":"+PORT);
+    console.log('Listening at '+HOST+":"+PORT);
+} else {
+    console.error("Please run \"npm run setup\"");
 }
