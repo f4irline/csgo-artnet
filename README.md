@@ -2,11 +2,13 @@
 
 ## An application to fetch data from CS:GO Game State Integration API and turn it to ArtNet signal
 
-### Introduction
+### INTRODUCTION
 
 The server side is made with **Node.js** utilizing the **Express** framework. The server side handles POST and GET requests from CS:GO API to process data and client side to process client side operations, such as setting configurations.
 
-### Functionality
+Basically the application listens to requests from the CS:GO Game State Integration, parses the data sent from it and sends ArtNet signal with a value of 255 to individual channels in the universe that the user has defined via web browser.
+
+### FUNCTIONALITY
 
 - Browser operations
   - Setting configurations such as the IP-address, port and universe to send the ArtNet signal in
@@ -33,3 +35,8 @@ The server side is made with **Node.js** utilizing the **Express** framework. Th
    - "Tester Token" is used for the web browser ArtNet tester buttons.
 7. Make sure that the tokens match the ones in the CS:GO gamestate_integration_x.cfg files (check https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Game_State_Integration)
 8. Launch game and connect to a game server!
+
+
+### TO BE IMPLEMENTED
+- Sending ArtNet signal to individual channels when an individual player dies
+- Setting events that will be listened to in the web browser
