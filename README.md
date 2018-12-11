@@ -37,7 +37,8 @@ Basically the application listens to requests from the CS:GO Game State Integrat
    - "Tester Token" is used for the web browser ArtNet tester buttons.
 8. From the CS:GO gamestate_integration_x.cfg (whichever you're using) file, make sure that:
    - The tokens match the ones in the CS:GO gamestate_integration_x.cfg files
-   - The "uri" is "127.0.0.1:3000/csgo" 
+   - The "uri" is matches the IP address and port you defined during the "npm run setup" phase, plus /csgo.
+     - e.g. "127.0.0.1:3000/csgo"
    - Check https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Game_State_Integration for more information
 9. Launch game and connect to a game server!
 
