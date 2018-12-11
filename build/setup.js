@@ -76,5 +76,5 @@ if (headless == 'y') {
     console.log(colors.green("\nApplication initialized. Listening HTTP requests at: "+HOST+":"+PORT));
 } else {
     console.log(colors.green("\nApplication initialized. Listening HTTP requests at: "+HOST+":"+PORT));
-    console.log(colors.green("Please go to http://"+HOST+":"+PORT+" via any web browser to configurate your application."));
+    console.log(colors.green("Please run \"npm run setup\" and go to http://"+HOST+":"+PORT+" via any web browser to configurate your application."));
 }
