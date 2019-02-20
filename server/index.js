@@ -204,7 +204,7 @@ let roundOver = true;
  */
 let aceCalled = false;
 
-app.post('/csgo', function(req, res, next) {
+app.post('/', function(req, res, next) {
 
     res.writeHead(200, { 'Content-Type': 'text/html' });
 
@@ -232,13 +232,22 @@ app.post('/csgo', function(req, res, next) {
  * @param {object} data - Payload as JSON object
  * @return {string} - The string and the date and time of the game event if a desired game event was detected
  */
-function processGameEvents(data) {
+function processGameEvents(gsidata) {
     // Ignore unauthenticated payloads
-    if (!isAuthentic(data)) {
-        return '';
-    }
+    // if (!isAuthentic(data)) {
+    //     return '';
+    // }
 
-    const date = new Date(data.provider.timestamp * 1000);
+    const data = gsidata.gsidata;
+
+    let date = '';
+
+    try {
+        date = new Date(data.provider.timestamp * 1000);
+    } catch (exception) {
+        date = new Date();
+    }
+    
     let output = '';
 
     if (!roundOver) {

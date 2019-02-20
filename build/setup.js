@@ -33,7 +33,7 @@ function createHostConfig() {
         port: PORT
     }
 
-    fs.writeFile("./host.json", JSON.stringify(hostObj, null, 2), (err) => {
+    fs.writeFile("./server/host.json", JSON.stringify(hostObj, null, 2), (err) => {
         if (err) {
             console.error(err);
             return;
@@ -63,7 +63,7 @@ if (headless == 'y') {
         testertoken: Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12)
     }
 
-    fs.writeFile("./config.json", JSON.stringify(artnetObj, null, 2), (err) => {
+    fs.writeFile("./server/config.json", JSON.stringify(artnetObj, null, 2), (err) => {
         if (err) {
             console.error(err);
             return;
