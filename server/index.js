@@ -5,6 +5,11 @@ const express = require('express');
 const app = express();
 const router = express.Router();
 
+// Channels:
+// 1: Bomb planted
+// 2: Bomb exploded
+// 3: Bomb defused
+
 let HOST = "";
 let PORT = "";
 
@@ -204,6 +209,11 @@ let roundOver = true;
  */
 let aceCalled = false;
 
+/**
+ * Are we on freeze time?
+ */
+let onFreezeTime = true;
+
 app.post('/', function(req, res, next) {
 
     res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -252,6 +262,8 @@ function processGameEvents(gsidata) {
 
     if (!roundOver) {
         output += detectGameEvent(data);
+    } else if (!onFreezeTime) {
+        output += detectFreezeTime(data);    
     } else {
         output += detectGoingLive(data);
     }
@@ -294,7 +306,19 @@ function detectGoingLive(data) {
     if (readProperty(data, 'round.phase') === "live") {
         roundOver = false;
         aceCalled = false;
-        output = "Going live!";
+        onFreezeTime = false;
+        output = goLive(data);
+    }
+
+    return output;
+}
+
+function detectFreezeTime(data) {
+    let output = '';
+    
+    if (readProperty(data, 'round.phase') === "freezetime") {
+        onFreezeTime = true;
+        output = freezeTime(data);
     }
 
     return output;
@@ -316,9 +340,9 @@ function detectGameEvent(data) {
             output += bombPlanted();
         }
 
-        if (monitorPlayers(readProperty(data, 'allplayers'))) {
-            output += ace();
-        }
+        // if (monitorPlayers(readProperty(data, 'allplayers'))) {
+        //     output += ace();
+        // }
     }
 
     return output;
@@ -462,7 +486,7 @@ function bombExploded() {
 function CTWin() {
     let artnet = require('artnet')(options);
 
-    artnet.set(UNIVERSE, 4, 255, function (err, res) {
+    artnet.set(UNIVERSE, 1, [0, null, 0, 255], function (err, res) {
         artnet.close();
     });
     
@@ -477,7 +501,7 @@ function CTWin() {
 function TWin() {
     let artnet = require('artnet')(options);
 
-    artnet.set(UNIVERSE, 5, 255, function (err, res) {
+    artnet.set(UNIVERSE, 1, [0, 0, null, 0, 255], function (err, res) {
         artnet.close();
     });
     
@@ -500,6 +524,30 @@ function ace() {
     aceCalled = true;
 
     return "A player has aced.";
+}
+
+function freezeTime() {
+    let artnet = require('artnet')(options);
+
+    artnet.set(UNIVERSE, 7, 255, function (err, res) {
+        artnet.close();
+    });
+
+    artnet.set(UNIVERSE, 1, [0, 0, 0, 0, 0], function (err, res) {
+        artnet.close();
+    });
+
+    return "Freeze time!";
+}
+
+function goLive() {
+    let artnet = require('artnet')(options);
+
+    artnet.set(UNIVERSE, 7, [0, 255], function (err, res) {
+        artnet.close();
+    });
+
+    return "Going live!";
 }
 
 /**
@@ -531,7 +579,6 @@ app.use('/', router);
 
 if (checkExistingFiles()) {
     app.listen(PORT, HOST);
-
     console.log('Listening at '+HOST+":"+PORT);
 } else {
     console.error("Please run \"npm run setup\"");
