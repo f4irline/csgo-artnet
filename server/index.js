@@ -214,7 +214,7 @@ let aceCalled = false;
  */
 let onFreezeTime = true;
 
-app.post('/', function(req, res, next) {
+app.post('/csgo', function(req, res, next) {
 
     res.writeHead(200, { 'Content-Type': 'text/html' });
 
