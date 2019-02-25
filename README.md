@@ -22,6 +22,17 @@ Basically the application listens to requests from the CS:GO Game State Integrat
   - Ts win
   - Player scores an ace
 
+
+### EVENTS
+- Channel 1: Bomb planted
+- Channel 2: Bomb defused
+- Channel 3: Bomb exploded
+- Channel 4: CTs win
+- Channel 5: Ts win
+- Channel 7: Freeze time
+- Channel 8: Going live
+
+
 ### HOW TO USE
 
 1. Clone this repository anywhere on your local machine
@@ -42,6 +53,19 @@ Basically the application listens to requests from the CS:GO Game State Integrat
    - Check https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Game_State_Integration for more information
 9. Launch game and connect to a game server!
 
+### EXAMPLE CONFIG.JSON
+```
+{
+  "ip": "127.0.0.1",
+  "port": "6454",
+  "universe": "1",
+  "playertoken": "j8fc2qd3d6u67w3l5k4n",
+  "observertoken": "a1om2r8e7ugrq0a24zqv",
+  "testertoken": "4wrqmgsu6ud1bjhd1gv6"
+}
+```
+
 ### TO BE IMPLEMENTED
 - Sending ArtNet signal to individual channels when an individual player dies
 - Setting events that will be listened to in the web browser
+
