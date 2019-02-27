@@ -486,7 +486,7 @@ function bombExploded() {
 function CTWin() {
     let artnet = require('artnet')(options);
 
-    artnet.set(UNIVERSE, 1, [0, null, 0, 255], function (err, res) {
+    artnet.set(UNIVERSE, 4, 255, function (err, res) {
         artnet.close();
     });
     
@@ -501,7 +501,7 @@ function CTWin() {
 function TWin() {
     let artnet = require('artnet')(options);
 
-    artnet.set(UNIVERSE, 1, [0, 0, null, 0, 255], function (err, res) {
+    artnet.set(UNIVERSE, 5, 255, function (err, res) {
         artnet.close();
     });
     
@@ -533,17 +533,13 @@ function freezeTime() {
         artnet.close();
     });
 
-    artnet.set(UNIVERSE, 1, [0, 0, 0, 0, 0], function (err, res) {
-        artnet.close();
-    });
-
     return "Freeze time!";
 }
 
 function goLive() {
     let artnet = require('artnet')(options);
 
-    artnet.set(UNIVERSE, 7, [0, 255], function (err, res) {
+    artnet.set(UNIVERSE, 8, 255, function (err, res) {
         artnet.close();
     });
 
