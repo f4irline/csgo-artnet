@@ -372,68 +372,6 @@ function checkWinningTeam(data) {
 }
 
 /**
- * Iterates constantly through all players and checks whether a player has made an ace (killed 5 enemies) or
- * is dead.
- * 
- * @param {Object} players - object which consists all the players and their information.
- * @return {boolean} - true if an ace is found, false if an ace was not found.
- */
-function monitorPlayers(players) {
-    let aceFound = false;
-
-    try {
-        Object.keys(players).forEach(function(key) {
-            const player = players[key];
-            if (checkKillsAndHealth(player)) {
-                aceFound = true;
-            }
-        });
-    } catch (err) {
-        aceFound = false;
-    }
-
-    return aceFound;
-}
-
-/**
- * Checks the amount of kills and health that a single player has.
- * 
- * @param {Object} player - the player object which holds information from a single player.
- * @return {boolean} - true if an ace was found, false if an ace was not found.
- */
-function checkKillsAndHealth(player) {
-    let aceFound = false;
-
-    Object.keys(player).forEach(function(key) {
-        const state = player[key];
-        if (state.hasOwnProperty('round_kills')) {
-            const kills = state['round_kills'];
-            if (kills === 5 && !aceCalled) {
-                aceFound = true;
-            }
-        }
-
-        if (state.hasOwnProperty('health')) {
-            if (state['health'] == 0) {
-                playerDead(player);
-            }
-        }
-    })
-
-    return aceFound;
-}
-
-/**
- * Called if a player dies. Later I will implement a solution to dim out a single light, which is focused on a player,
- * when the player dies.
- * 
- * @param {Object} player - the player object which holds information from a single player.
- */
-function playerDead(player) {
-    console.log(player['name'] + " is dead.");
-}
-
-/**
  * Sends an artnet signal to channel one of the defined universe when bomb was planted.
  * 
  * @return {String} - indication to console that bomb plant was detected.
@@ -508,28 +446,10 @@ function TWin() {
     return "Ts win";
 }
 
-/**
- * Sends an artnet signal to channel six of the defined universe when someone has made an ace.
- * Sets aceCalled to be true to avoid calling ace() method multiple times.
- * 
- * @return {String} - indication to console that an ace has bene done.
- */
-function ace() {
-    let artnet = require('artnet')(options);
-
-    artnet.set(UNIVERSE, 6, 255, function (err, res) {
-        artnet.close();
-    });
-
-    aceCalled = true;
-
-    return "A player has aced.";
-}
-
 function freezeTime() {
     let artnet = require('artnet')(options);
 
-    artnet.set(UNIVERSE, 7, 255, function (err, res) {
+    artnet.set(UNIVERSE, 6, 255, function (err, res) {
         artnet.close();
     });
 
@@ -539,7 +459,7 @@ function freezeTime() {
 function goLive() {
     let artnet = require('artnet')(options);
 
-    artnet.set(UNIVERSE, 8, 255, function (err, res) {
+    artnet.set(UNIVERSE, 7, 255, function (err, res) {
         artnet.close();
     });
 

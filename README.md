@@ -29,8 +29,8 @@ Basically the application listens to requests from the CS:GO Game State Integrat
 - Channel 3: Bomb exploded
 - Channel 4: CTs win
 - Channel 5: Ts win
-- Channel 7: Freeze time
-- Channel 8: Going live
+- Channel 6: Freeze time
+- Channel 7: Going live
 
 
 ### HOW TO USE
