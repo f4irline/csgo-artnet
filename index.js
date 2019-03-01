@@ -343,7 +343,6 @@ function detectGoingLive(data, firstseat) {
         aceCalled = false;
         onFreezeTime = false;
         output = goLive(data);
-        output += checkSide(firstseat, data);
     }
 
     return output;
