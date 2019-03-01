@@ -1,7 +1,7 @@
 http = require('http');
 fs = require('fs');
 
-const HOST = 'localhost';
+const HOST = '85.188.59.27';
 const PORT = 8080;
 
 const bodyParser = require('body-parser')

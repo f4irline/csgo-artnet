@@ -61,6 +61,8 @@ let authTokenPlayer = "";
 let authTokenObserver = "";
 let authTokenArtnet = "";
 
+let sideAtLeft = "";
+
 /**
  * Checks if host.json and config.json files exist.
  * 
@@ -156,14 +158,18 @@ router.post('/clicked', (req, res) => {
     const AUTH = req.body.auth;
     const CHANNEL = req.body.channel;
 
+
     if (AUTH === authTokenArtnet) { 
         res.writeHead(200, { "Content-Type": "text/html" });
 
         let artnet = require('artnet')(options);
+        console.log('ArtNet sent');
+        console.log('Uni: '+UNIVERSE);
+        console.log('Chan: '+CHANNEL);
 
-        artnet.set(UNIVERSE, CHANNEL, 255, function (err, res) {
-            artnet.close();
-        });       
+        //artnet.set(UNIVERSE, CHANNEL, 255, function (err, res) {
+	//    artnet.close();
+        //});       
 
         res.end('ok');
     } else {
@@ -249,6 +255,7 @@ function processGameEvents(gsidata) {
     // }
 
     const data = gsidata.gsidata;
+    const firstseat = gsidata.seating[0];
 
     let date = '';
 
@@ -265,7 +272,7 @@ function processGameEvents(gsidata) {
     } else if (!onFreezeTime) {
         output += detectFreezeTime(data);    
     } else {
-        output += detectGoingLive(data);
+        output += detectGoingLive(data, firstseat);
     }
 
     if (output.length > 0) {
@@ -278,6 +285,34 @@ function processGameEvents(gsidata) {
     }
 
     return output;
+}
+
+function checkSide(firstseat, data) {
+    const firstPlayer = readProperty(firstseat, 'Name');
+    const players = data.allplayers;
+
+    let output = '';
+    
+    try {
+        Object.keys(players).forEach(function(key) {
+            const player = players[key];
+            if (player.name === firstPlayer) {
+                if (sideAtLeft !== player.team) {
+                    sideAtLeft = player.team;
+                    console.log(player.team);
+                    if (player.team === 'CT') {
+                        output += firstSideCT();
+                    } else if (player.team === 'T') {
+                        output += firstSideT();
+                    }
+                }
+            }            
+        })
+    } catch (err) {
+        console.log(err);
+    }
+
+    return ", "+output;
 }
 
 /**
@@ -300,7 +335,7 @@ function isAuthentic(data) {
  * @param {Object} data - The payload from CS:GO observer as a JSON object
  * @return {String} - Indication of going live when going live.
  */
-function detectGoingLive(data) {
+function detectGoingLive(data, firstseat) {
     let output ='';
 
     if (readProperty(data, 'round.phase') === "live") {
@@ -308,6 +343,7 @@ function detectGoingLive(data) {
         aceCalled = false;
         onFreezeTime = false;
         output = goLive(data);
+        output += checkSide(firstseat, data);
     }
 
     return output;
@@ -332,7 +368,13 @@ function detectFreezeTime(data) {
 function detectGameEvent(data) {
     let output = '';
 
-    if (readProperty(data, 'round.phase') === "over") {
+    if (readProperty(data, 'map.phase') === "gameover") {
+        if (readProperty(data, 'map.team_ct.score') !== readProperty(data, 'map.team_t.score')) {
+	    output += gameOver();
+            roundOver = true;
+	} 
+    }
+    else if (readProperty(data, 'round.phase') === "over") {
         output += checkWinningTeam(data);
         roundOver = true;
     } else {
@@ -362,13 +404,24 @@ function checkWinningTeam(data) {
             output += ", "+bombDefused();
         }
     } else {
-        output += TWin();
-
         if (readProperty(data, 'round.bomb') === "exploded") {
             output += ", "+bombExploded();
-        }
+        } else {
+	    output += ", "+TWin();
+	}
     }
     return output;
+}
+
+function gameOver() {
+    let artnet = require('artnet')(options);
+    
+    artnet.set(UNIVERSE, 8, 255, function (err, res) {
+	artnet.close();
+	console.log('Artnet GameOver');
+    });
+
+    return "Game over";
 }
 
 /**
@@ -381,6 +434,7 @@ function bombPlanted() {
 
     artnet.set(UNIVERSE, 1, 255, function (err, res) {
         artnet.close();
+	console.log('Artnet Bomb');
     });        
 
     return "Bomb planted";
@@ -396,6 +450,7 @@ function bombDefused() {
 
     artnet.set(UNIVERSE, 2, 255, function (err, res) {
         artnet.close();
+	console.log('Artnet defused');
     });
     
     return "Bomb defused";
@@ -411,6 +466,7 @@ function bombExploded() {
 
     artnet.set(UNIVERSE, 3, 255, function (err, res) {
         artnet.close();
+	console.log('Artnet exploded');
     });
     
     return "Bomb exploded";
@@ -426,6 +482,7 @@ function CTWin() {
 
     artnet.set(UNIVERSE, 4, 255, function (err, res) {
         artnet.close();
+	console.log('Artnet ct');
     });
     
     return "CTs win";
@@ -441,6 +498,7 @@ function TWin() {
 
     artnet.set(UNIVERSE, 5, 255, function (err, res) {
         artnet.close();
+	console.log('Artnet Twin');
     });
     
     return "Ts win";
@@ -451,6 +509,7 @@ function freezeTime() {
 
     artnet.set(UNIVERSE, 6, 255, function (err, res) {
         artnet.close();
+	console.log('Artnet Freezetime');
     });
 
     return "Freeze time!";
@@ -459,11 +518,32 @@ function freezeTime() {
 function goLive() {
     let artnet = require('artnet')(options);
 
-    artnet.set(UNIVERSE, 7, 255, function (err, res) {
+    artnet.set(UNIVERSE, 7, 0, function (err, res) {
         artnet.close();
+        console.log('Artnet goLive');
     });
 
     return "Going live!";
+}
+
+function firstSideCT() {
+	    let artnet = require('artnet')(options);
+
+	    artnet.set(UNIVERSE, 10, 255, function (err, res) {
+		            artnet.close();
+		        });
+
+	    return "Changing first side to CT";
+}
+
+function firstSideT() {
+	    let artnet = require ('artnet')(options);
+
+	    artnet.set(UNIVERSE, 11, 255, function (err, res) {
+		            artnet.close();
+		        });
+
+	    return "Changing first side to T";
 }
 
 /**
