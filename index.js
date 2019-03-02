@@ -5,11 +5,9 @@ const express = require('express');
 const app = express();
 const router = express.Router();
 
-// Channels:
-// 1: Bomb planted
-// 2: Bomb exploded
-// 3: Bomb defused
-
+/**
+ * Configuration for receiving requests
+ */
 let HOST = "";
 let PORT = "";
 
@@ -39,6 +37,9 @@ const bodyParser = require('body-parser')
  */
 let config = {};
 
+/**
+ * JSON Object (which will be parsed from the host.json file)
+ */
 let hostSettings = {};
 
 /**
@@ -61,8 +62,10 @@ let authTokenPlayer = "";
 let authTokenObserver = "";
 let authTokenArtnet = "";
 
-let bombTimer = 40;
+// Bomb timer in the CS:GO server, needs to be modified manually
+const bombTimer = 40;
 
+// setTimeOut function for launching bomb explosion cue via ArtNet
 let bombTimeout;
 
 let sideAtLeft = "";
