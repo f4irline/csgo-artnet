@@ -224,7 +224,7 @@ let aceCalled = false;
  */
 let onFreezeTime = true;
 
-app.post('/', function(req, res, next) {
+app.post('/csgo', function(req, res, next) {
 
     res.writeHead(200, { 'Content-Type': 'text/html' });
 
@@ -258,7 +258,7 @@ function processGameEvents(gsidata) {
     //     return '';
     // }
 
-    const data = gsidata;
+    const data = gsidata.gsidata;
     const firstseat = null;
 
     let date = '';
