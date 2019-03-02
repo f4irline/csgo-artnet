@@ -61,6 +61,10 @@ let authTokenPlayer = "";
 let authTokenObserver = "";
 let authTokenArtnet = "";
 
+let bombTimer = 40;
+
+let bombTimeout;
+
 let sideAtLeft = "";
 
 /**
@@ -220,7 +224,7 @@ let aceCalled = false;
  */
 let onFreezeTime = true;
 
-app.post('/csgo', function(req, res, next) {
+app.post('/', function(req, res, next) {
 
     res.writeHead(200, { 'Content-Type': 'text/html' });
 
@@ -254,8 +258,8 @@ function processGameEvents(gsidata) {
     //     return '';
     // }
 
-    const data = gsidata.gsidata;
-    const firstseat = gsidata.seating[0];
+    const data = gsidata;
+    const firstseat = null;
 
     let date = '';
 
@@ -287,33 +291,33 @@ function processGameEvents(gsidata) {
     return output;
 }
 
-function checkSide(firstseat, data) {
-    const firstPlayer = readProperty(firstseat, 'Name');
-    const players = data.allplayers;
+// function checkSide(firstseat, data) {
+//     const firstPlayer = readProperty(firstseat, 'Name');
+//     const players = data.allplayers;
 
-    let output = '';
+//     let output = '';
     
-    try {
-        Object.keys(players).forEach(function(key) {
-            const player = players[key];
-            if (player.name === firstPlayer) {
-                if (sideAtLeft !== player.team) {
-                    sideAtLeft = player.team;
-                    console.log(player.team);
-                    if (player.team === 'CT') {
-                        output += firstSideCT();
-                    } else if (player.team === 'T') {
-                        output += firstSideT();
-                    }
-                }
-            }            
-        })
-    } catch (err) {
-        console.log(err);
-    }
+//     try {
+//         Object.keys(players).forEach(function(key) {
+//             const player = players[key];
+//             if (player.name === firstPlayer) {
+//                 if (sideAtLeft !== player.team) {
+//                     sideAtLeft = player.team;
+//                     console.log(player.team);
+//                     if (player.team === 'CT') {
+//                         output += firstSideCT();
+//                     } else if (player.team === 'T') {
+//                         output += firstSideT();
+//                     }
+//                 }
+//             }            
+//         });
+//     } catch (err) {
+//         console.log(err);
+//     }
 
-    return ", "+output;
-}
+//     return ", "+output;
+// }
 
 /**
  * Checks that the auth token from the CS:GO observer or player matches the one defined in this software.
@@ -321,13 +325,13 @@ function checkSide(firstseat, data) {
  * @param {object} data - The payload from CS:GO observer as a JSON object
  * @return {boolean}
  */
-function isAuthentic(data) {
-    let authenticated = false;
-    if (readProperty(data, 'auth.token') === authTokenPlayer || readProperty(data, 'auth.token') === authTokenObserver) {
-        authenticated = true;
-    }
-    return authenticated;
-}
+// function isAuthentic(data) {
+//     let authenticated = false;
+//     if (readProperty(data, 'auth.token') === authTokenPlayer || readProperty(data, 'auth.token') === authTokenObserver) {
+//         authenticated = true;
+//     }
+//     return authenticated;
+// }
 
 /**
  * Called if round is over. Checks when the round starts and returns indication of that.
@@ -345,7 +349,7 @@ function detectGoingLive(data, firstseat) {
         output = goLive(data);
     }
 
-    return output;
+    return output; 
 }
 
 function detectFreezeTime(data) {
@@ -369,18 +373,17 @@ function detectGameEvent(data) {
 
     if (readProperty(data, 'map.phase') === "gameover") {
         if (readProperty(data, 'map.team_ct.score') !== readProperty(data, 'map.team_t.score')) {
-	    output += gameOver();
+	        output += gameOver();
             roundOver = true;
-	} 
-    }
-    else if (readProperty(data, 'round.phase') === "over") {
+	    } 
+    } else if (readProperty(data, 'round.phase') === "over") {
+        clearTimeout(bombTimeout);
         output += checkWinningTeam(data);
         roundOver = true;
     } else {
         if (readProperty(data, 'added.round.bomb')) {
             output += bombPlanted();
         }
-
         // if (monitorPlayers(readProperty(data, 'allplayers'))) {
         //     output += ace();
         // }
@@ -403,24 +406,11 @@ function checkWinningTeam(data) {
             output += ", "+bombDefused();
         }
     } else {
-        if (readProperty(data, 'round.bomb') === "exploded") {
-            output += ", "+bombExploded();
-        } else {
-	    output += ", "+TWin();
-	}
+        if (readProperty(data, 'round.bomb') !== "exploded") {
+	        output += TWin();
+        }
     }
     return output;
-}
-
-function gameOver() {
-    let artnet = require('artnet')(options);
-    
-    artnet.set(UNIVERSE, 8, 255, function (err, res) {
-	artnet.close();
-	console.log('Artnet GameOver');
-    });
-
-    return "Game over";
 }
 
 /**
@@ -429,12 +419,9 @@ function gameOver() {
  * @return {String} - indication to console that bomb plant was detected.
  */
 function bombPlanted() {    
-    let artnet = require('artnet')(options);
-
-    artnet.set(UNIVERSE, 1, 255, function (err, res) {
-        artnet.close();
-	console.log('Artnet Bomb');
-    });        
+    bombTimeout = setTimeout(() => {
+        console.log(new Date() + " " + bombExploded());   
+    }, (bombTimer * 1000));
 
     return "Bomb planted";
 }
@@ -447,9 +434,10 @@ function bombPlanted() {
 function bombDefused() {
     let artnet = require('artnet')(options);
 
+    clearTimeout(bombTimeout);
+
     artnet.set(UNIVERSE, 2, 255, function (err, res) {
         artnet.close();
-	console.log('Artnet defused');
     });
     
     return "Bomb defused";
@@ -465,7 +453,6 @@ function bombExploded() {
 
     artnet.set(UNIVERSE, 3, 255, function (err, res) {
         artnet.close();
-	console.log('Artnet exploded');
     });
     
     return "Bomb exploded";
@@ -481,7 +468,6 @@ function CTWin() {
 
     artnet.set(UNIVERSE, 4, 255, function (err, res) {
         artnet.close();
-	console.log('Artnet ct');
     });
     
     return "CTs win";
@@ -497,7 +483,6 @@ function TWin() {
 
     artnet.set(UNIVERSE, 5, 255, function (err, res) {
         artnet.close();
-	console.log('Artnet Twin');
     });
     
     return "Ts win";
@@ -508,7 +493,6 @@ function freezeTime() {
 
     artnet.set(UNIVERSE, 6, 255, function (err, res) {
         artnet.close();
-	console.log('Artnet Freezetime');
     });
 
     return "Freeze time!";
@@ -519,30 +503,39 @@ function goLive() {
 
     artnet.set(UNIVERSE, 7, 0, function (err, res) {
         artnet.close();
-        console.log('Artnet goLive');
     });
 
     return "Going live!";
 }
 
+function gameOver() {
+    let artnet = require('artnet')(options);
+    
+    artnet.set(UNIVERSE, 8, 255, function (err, res) {
+	    artnet.close();
+    });
+
+    return "Game over";
+}
+
 function firstSideCT() {
-	    let artnet = require('artnet')(options);
+    let artnet = require('artnet')(options);
 
-	    artnet.set(UNIVERSE, 10, 255, function (err, res) {
-		            artnet.close();
-		        });
+    artnet.set(UNIVERSE, 10, 255, function (err, res) {
+        artnet.close();
+    });
 
-	    return "Changing first side to CT";
+    return "Changing first side to CT";
 }
 
 function firstSideT() {
-	    let artnet = require ('artnet')(options);
+    let artnet = require ('artnet')(options);
 
-	    artnet.set(UNIVERSE, 11, 255, function (err, res) {
-		            artnet.close();
-		        });
+    artnet.set(UNIVERSE, 11, 255, function (err, res) {
+        artnet.close();
+    });
 
-	    return "Changing first side to T";
+    return "Changing first side to T";
 }
 
 /**
