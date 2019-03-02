@@ -4,10 +4,6 @@ fs = require('fs');
 const HOST = '85.188.59.27';
 const PORT = 8080;
 
-const bodyParser = require('body-parser')
-
-http
-
 server = http.createServer( function(req, res) {
 
     if (req.method == 'POST') {
