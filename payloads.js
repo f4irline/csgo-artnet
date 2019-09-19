@@ -1,8 +1,13 @@
+/**
+ * The purpose of this module is to test that the payloads are coming
+ * in from the CS:GO client as they should.
+ */
+
 http = require('http');
 fs = require('fs');
 
-const HOST = '85.188.59.27';
-const PORT = 8080;
+const HOST = 'localhost';
+const PORT = 3000;
 
 server = http.createServer( function(req, res) {
 

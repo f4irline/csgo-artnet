@@ -2,9 +2,10 @@
   "name": "csgo-artnet",
   "version": "1.0.0",
   "description": "A small NodeJS application to transfer data from Counter-Strike: Global Offensive and translate it for a lighting console using the ArtNet protocol.",
-  "main": "server/index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node server/index.js",
+    "start": "node src/index.js",
+    "start-payloads": "node payloads.js",
     "setup": "node build/setup.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
